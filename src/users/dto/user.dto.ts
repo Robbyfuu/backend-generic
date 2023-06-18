@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { IsEmail, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsString } from 'class-validator';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { User } from '../entities/user.entity';
 
@@ -13,7 +13,7 @@ export class UserDto {
   @Expose()
   @ApiProperty()
   @Transform(({ value }) => value.toString(), { toPlainOnly: true }) // Transformar ObjectId a cadena
-  readonly _id: string;
+  readonly _id?: string;
 
   @Expose()
   @ApiProperty()
@@ -24,6 +24,11 @@ export class UserDto {
   @ApiProperty()
   @IsString()
   readonly firstName: string;
+
+  @Expose()
+  @ApiProperty()
+  @IsBoolean()
+  readonly isActive: boolean;
 
   @Expose()
   @ApiProperty()

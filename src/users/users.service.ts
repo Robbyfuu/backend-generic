@@ -10,6 +10,8 @@ import * as bcrypt from 'bcryptjs';
 import { Model } from 'mongoose';
 import { User } from './entities/user.entity';
 import { UpdateProfileDto, UpdateProfileInput } from './dto';
+import { RegisterUserBody } from 'src/auth/dto';
+import { UserDto } from './dto/user.dto';
 function filterUser(user: any): any {
   return user._doc;
 }
@@ -26,7 +28,7 @@ export class UsersService {
     @InjectModel(User.name)
     private readonly usersModel: Model<User>,
   ) {}
-  async create(createUserInput: Partial<User>): Promise<User> {
+  async create(createUserInput: RegisterUserBody): Promise<User> {
     try {
       const user = this.usersModel.create({
         ...createUserInput,
@@ -40,7 +42,7 @@ export class UsersService {
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<User[]> {
     const users = await this.usersModel.find({}).exec();
     return users;
   }
@@ -58,7 +60,7 @@ export class UsersService {
       throw new Error('One of ID, email or post ID must be provided.');
     }
   }
-  async findByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<UserDto> {
     return await this.usersModel.findOne({
       email: { $regex: new RegExp('^' + email + '$', 'i') },
     });
@@ -67,7 +69,7 @@ export class UsersService {
   async update(
     id: string,
     updateUserInput: UpdateProfileInput | UpdateProfileDto,
-  ) {
+  ): Promise<UserDto> {
     const user = await this.usersModel.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');

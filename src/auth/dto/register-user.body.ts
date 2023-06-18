@@ -7,13 +7,10 @@ import {
   MinLength,
 } from 'class-validator';
 
-@InputType()
 export class RegisterUserBody {
-  @Field()
   @IsEmail()
   email: string;
 
-  @Field()
   @IsString()
   @MinLength(6)
   @MaxLength(50)

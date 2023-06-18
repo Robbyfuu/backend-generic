@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, SchemaTypes } from 'mongoose';
+import * as mongoose from 'mongoose';
 import { User } from '../../users/entities/user.entity';
 
 @Schema()
-export class RefreshToken extends Document {
-  @Prop({ type: SchemaTypes.ObjectId, ref: 'User' })
-  user: User;
+export class RefreshToken extends mongoose.Document {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  user: mongoose.Types.ObjectId | User;
   @Prop({ type: Boolean })
   revoked = false;
   @Prop()

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Request } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { UserDto } from '../users/dto/user.dto';
 import { AuthService } from './auth.service';
@@ -9,13 +9,14 @@ import { RefreshTokenResponse } from './dto/refresh-token.response';
 
 import { RegisterUserResponse } from './dto/register-user.response';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { RegisterUserInput, RegisterUserBody } from './dto';
+import { RegisterUserBody } from './dto';
 
 @Controller('auth')
 export class AuthController {
+  logger = new Logger(AuthController.name);
   constructor(private authService: AuthService) {}
 
-  // @UseGuards(LocalAuthGuard)
+  //@UseGuards(LocalAuthGuard)
   @Post('loginRefresh')
   @ApiBody({ type: LoginUserBody })
   @ApiOkResponse({
@@ -23,15 +24,17 @@ export class AuthController {
     type: LoginUserResponse,
   })
   async loginRefresh(@Request() req) {
-    console.log(req);
-    const accessToken = await this.authService.generateAccessToken(req.user);
-    const refreshToken = await this.authService.generateRefreshToken(
-      req.user,
-      60 * 60 * 24 * 30,
+    const accessToken = await this.authService.generateAccessToken(
+      req.headers.user,
     );
+    const refreshToken = await this.authService.generateRefreshToken(
+      req.headers.user,
+      1687119147,
+    );
+    const user = await this.authService.getUserFromToken(req.headers.user);
 
     const payload = new LoginUserResponse();
-    payload.user = new UserDto(req.user);
+    payload.user = user;
     payload.accessToken = accessToken;
     payload.refreshToken = refreshToken;
 
@@ -44,22 +47,18 @@ export class AuthController {
     description: 'User has been logged in.',
     type: LoginUserResponse,
   })
-  async login(@Body() loginInput: LoginUserBody) {
-    const user = await this.authService.validateUser(
-      loginInput.email,
-      loginInput.password,
-    );
+  async login(@Body() loginInput: LoginUserBody): Promise<LoginUserResponse> {
+    const user = await this.authService.login(loginInput);
     const accessToken = await this.authService.generateAccessToken(user);
     const refreshToken = await this.authService.generateRefreshToken(
       user,
-      60 * 60 * 24 * 30,
+      1687119147,
     );
-    const { _id, email, isActive, firstName, lastName } = user;
-    const payload = {
-      user: user,
-      accessToken,
-      refreshToken,
-    };
+
+    const payload = new LoginUserResponse();
+    payload.user = user;
+    payload.accessToken = accessToken;
+    payload.refreshToken = refreshToken;
 
     return payload;
   }
@@ -69,15 +68,16 @@ export class AuthController {
     description: 'Generates a new access token.',
     type: RefreshTokenResponse,
   })
-  async refresh(@Body() refreshInput: RefreshTokenBody) {
-    console.log(refreshInput);
+  async refresh(@Body() body) {
+    this.logger.log(body);
     const { user, token } =
       await this.authService.createAccessTokenFromRefreshToken(
-        refreshInput.refreshToken,
+        body.refreshToken,
       );
+    const userDto = user as UserDto;
 
     const payload = new RefreshTokenResponse();
-    payload.user = new UserDto(user);
+    payload.user = userDto;
     payload.accessToken = token;
 
     return payload;
@@ -97,17 +97,12 @@ export class AuthController {
     const accessToken = await this.authService.generateAccessToken(user);
     const refreshToken = await this.authService.generateRefreshToken(
       user,
-      60 * 60 * 24 * 30,
+      1687119147,
     );
-    const { _id, email, isActive, firstName, lastName } = user;
-    const payload = {
-      user: { _id, email, isActive, firstName, lastName },
-      accessToken,
-      refreshToken,
-    };
-    // payload.user = { _id, email, isActive, firstName, lastName };
-    // payload.accessToken = accessToken;
-    // payload.refreshToken = refreshToken;
+    const payload = new RegisterUserResponse();
+    payload.user = user;
+    payload.accessToken = accessToken;
+    payload.refreshToken = refreshToken;
 
     return payload;
   }

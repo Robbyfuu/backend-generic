@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -11,8 +12,12 @@ import * as bcrypt from 'bcryptjs';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from 'src/users/entities/user.entity';
+import { LoginUserBody, RegisterUserBody } from './dto';
+import { UserDto } from 'src/users/dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 @Injectable()
 export class AuthService {
+  logger = new Logger('AuthService');
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -20,19 +25,27 @@ export class AuthService {
     private readonly refreshTokenModel: Model<RefreshToken>,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOne({ email });
-    if (user) {
-      if (!user.isActive) {
-        throw new UnauthorizedException(`User is inactive, talk with an admin`);
-      }
-      const { password, ...result } = user;
-      const match = await bcrypt.compare(pass, password);
-      if (match) {
-        return result;
-      }
+  // async validateUser(email: string, pass: string): Promise<any> {
+  //   const user = await this.usersService.findOne({ email });
+  //   if (user) {
+  //     if (!user.isActive) {
+  //       throw new UnauthorizedException(`User is inactive, talk with an admin`);
+  //     }
+  //     const { password, ...result } = user;
+  //     const match = await bcrypt.compare(pass, password);
+  //     if (match) {
+  //       return result;
+  //     }
+  //   }
+  //   return null;
+  // }
+  async validateUser(id: string): Promise<UserDto> {
+    const user = await this.usersService.findOne({ id });
+
+    if (!user.isActive) {
+      throw new UnauthorizedException(`User is inactive, talk with an admin`);
     }
-    return null;
+    return user;
   }
 
   async generateAccessToken(user: Pick<User, '_id'>) {
@@ -40,7 +53,7 @@ export class AuthService {
     return await this.jwtService.signAsync(payload);
   }
 
-  async createRefreshToken(user: Pick<User, 'id'>, ttl: number) {
+  async createRefreshToken(user: Pick<User, '_id'>, ttl: number) {
     const expiration = new Date();
     expiration.setTime(expiration.getTime() + ttl);
 
@@ -54,9 +67,9 @@ export class AuthService {
     return token;
   }
 
-  async generateRefreshToken(user: Pick<User, 'id'>, expiresIn: number) {
-    const payload = { sub: String(user.id) };
-    const token = await this.createRefreshToken(user, expiresIn);
+  async generateRefreshToken(user: Pick<User, '_id'>, expiresIn: number) {
+    const payload = { sub: String(user._id) };
+    const token = await this.createRefreshToken(user._id, expiresIn);
     return await this.jwtService.signAsync({
       ...payload,
       expiresIn,
@@ -67,14 +80,15 @@ export class AuthService {
   async resolveRefreshToken(encoded: string) {
     try {
       const payload = await this.jwtService.verify(encoded);
-
+      console.log(payload);
       if (!payload.sub || !payload.jwtId) {
         throw new UnprocessableEntityException('Refresh token malformed');
       }
 
       const token = await this.refreshTokenModel.findOne({
-        id: payload.jwtId,
+        _id: payload.jwtId,
       });
+      this.logger.log(token);
 
       if (!token) {
         throw new UnprocessableEntityException('Refresh token not found');
@@ -84,8 +98,8 @@ export class AuthService {
         throw new UnprocessableEntityException('Refresh token revoked');
       }
 
-      const user = await this.usersService.findOne({ id: payload.subject });
-
+      const user = await this.usersService.findOne({ id: payload.sub });
+      console.log(user)
       if (!user) {
         throw new UnprocessableEntityException('Refresh token malformed');
       }
@@ -99,6 +113,15 @@ export class AuthService {
       }
     }
   }
+  async getUserFromToken(token: string): Promise<UserDto> {
+    const payload = await this.jwtService.verify(token);
+    const user = await this.usersService.findOne({ id: payload.sub });
+    if (!user) {
+      throw new UnprocessableEntityException('Refresh token malformed');
+    }
+
+    return user;
+  }
 
   async createAccessTokenFromRefreshToken(refresh: string) {
     const { user } = await this.resolveRefreshToken(refresh);
@@ -108,30 +131,25 @@ export class AuthService {
     return { user, token };
   }
 
-  async register(email: string, pass: string) {
+  async register(email: string, pass: string): Promise<User> {
     const user = await this.usersService.findOne({ email });
     if (user) {
       // error user already exists
       throw new UnprocessableEntityException('User already exists');
     }
-
-    const userResponse = await this.usersService.create({
+    const registerUserBody: RegisterUserBody = {
       email,
       password: pass,
-    });
+    };
+    const userResponse = await this.usersService.create(registerUserBody);
     return userResponse;
   }
-  async login(email: string, pass: string): Promise<any> {
+  async login(loginInput: LoginUserBody): Promise<UserDto> {
+    const { email, password } = loginInput;
     const user = await this.usersService.findOne({ email });
-    if (!user) {
-      // error user already exists
-      throw new UnprocessableEntityException('User does not exist');
+    if (!bcrypt.compareSync(password, user.password)) {
+      throw new Error('Invalid credentials');
     }
-    const { password, ...result } = user;
-    const match = await bcrypt.compare(pass, password);
-    if (!match) {
-      throw new UnprocessableEntityException('Invalid credentials');
-    }
-    return result;
+    return user;
   }
 }

@@ -7,11 +7,9 @@ import {
   MinLength,
 } from 'class-validator';
 import { Field, InputType } from '@nestjs/graphql';
-@InputType()
 export class LoginUserBody {
   @ApiProperty()
   @IsEmail()
-  @Field()
   email: string;
 
   @ApiProperty()
@@ -22,6 +20,5 @@ export class LoginUserBody {
     message:
       'The password must have a Uppercase, lowercase letter and a number',
   })
-  @Field()
   password: string;
 }

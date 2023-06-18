@@ -12,9 +12,15 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  async findAll() {
+  @UseGuards(JwtAuthGuard)
+  async findAll(): Promise<UserDto[]> {
     const users = await this.usersService.findAll();
-    return users.map((u) => new UserDto(u));
+    users.map((user) => {
+      const modifiedUser = { ...user } as any;
+      delete modifiedUser._doc.password;
+      return modifiedUser;
+    });
+    return users;
   }
 
   @Get(':email')

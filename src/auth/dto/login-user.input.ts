@@ -6,7 +6,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-
+//graphql
 @InputType()
 export class LoginUserInput {
   @Field()

@@ -1,8 +1,10 @@
 import { TokenValidator } from '../jwt/validator.jwt';
 import { JwtService } from '@nestjs/jwt';
+import { Logger } from '@nestjs/common';
+const logger = new Logger('ApolloServer');
 export const myPlugin = {
   async serverWillStart() {
-    console.log('Server starting up!');
+    logger.log('ApolloServer is starting up...');
   },
   async requestDidStart(requestContext) {
     // console.log(requestContext);
@@ -11,7 +13,7 @@ export const myPlugin = {
     // Extraer el token de los headers de la solicitud
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      console.log('No token provided');
+      // console.log('No token provided');
       throw new Error('No token provided');
     }
 
@@ -20,14 +22,14 @@ export const myPlugin = {
     // console.log('Token', token);
     const jwtService = new JwtService({
       secret: 'ThisIsMySecret',
+      signOptions: { expiresIn: '7d' },
     });
     const tokenValidator = new TokenValidator(jwtService);
     try {
       // Verificar el token
       const decoded = tokenValidator.validateToken(token);
-      // console.log('Token is valid', decoded);
     } catch (err) {
-      console.log('Token is invalid', err);
+      logger.error('Token is invalid', err);
       throw new Error('Token is invalid');
     }
   },
