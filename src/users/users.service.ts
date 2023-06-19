@@ -35,7 +35,6 @@ export class UsersService {
         password: bcrypt.hashSync(createUserInput.password, 10),
       });
       await (await user).save();
-      console.log({ user });
       return user;
     } catch (error) {
       this.handleDBError(error);

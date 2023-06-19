@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { RefreshToken } from '../../auth/entities/refresh-token.entity';
+import { Post } from 'src/posts/entities/post.entity';
 
 @Schema()
 export class User extends mongoose.Document {
@@ -18,6 +19,9 @@ export class User extends mongoose.Document {
 
   @Prop({ default: true, type: Boolean })
   isActive: boolean;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Post' })
+  posts: mongoose.Types.ObjectId[] | Post[];
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'RefreshToken' })
   refreshTokens: mongoose.Types.ObjectId | RefreshToken;

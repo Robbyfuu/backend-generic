@@ -1,35 +1,86 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { PostsService } from './posts.service';
-import { Post } from './entities/post.entity';
+import { Selections } from '@jenyus-org/nestjs-graphql-utils';
+import { UnauthorizedException, UseGuards } from '@nestjs/common';
+import {
+  Args,
+  ID,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
+// import { UsersService } from 'src/users/users.service';
+import { GqlCurrentUser } from '../auth/decorator/gql-current-user.decorator';
+import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { UserObject } from '../users/dto/user.object';
+import { User } from '../users/entities/user.entity';
 import { CreatePostInput } from './dto/create-post.input';
+import { PostObject } from './dto/post.object';
 import { UpdatePostInput } from './dto/update-post.input';
+import { Post } from './entities/post.entity';
+import { PostsService } from './posts.service';
 
-@Resolver(() => Post)
+@Resolver(() => PostObject)
 export class PostsResolver {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService, // private usersService: UsersService,
+  ) {}
 
-  @Mutation(() => Post)
-  createPost(@Args('createPostInput') createPostInput: CreatePostInput) {
-    return this.postsService.create(createPostInput);
+  @Query(() => [PostObject])
+  posts(@Selections('posts', ['author']) relations: string[]) {
+    return this.postsService.findAll({ relations });
   }
 
-  @Query(() => [Post], { name: 'posts' })
-  findAll() {
-    return this.postsService.findAll();
-  }
-
-  @Query(() => Post, { name: 'post' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  @Query(() => PostObject)
+  post(
+    @Selections('post', ['author']) relations: string[],
+    @Args('id', { type: () => ID }) id: string,
+  ) {
     return this.postsService.findOne(id);
   }
 
-  @Mutation(() => Post)
-  updatePost(@Args('updatePostInput') updatePostInput: UpdatePostInput) {
-    return this.postsService.update(updatePostInput.id, updatePostInput);
+  @Mutation(() => PostObject)
+  @UseGuards(GqlAuthGuard)
+  createPost(
+    @GqlCurrentUser() user: User,
+    @Args('input') input: CreatePostInput,
+  ) {
+    console.log(user.id);
+    console.log(input);
+    return this.postsService.create(user.id, input);
   }
 
-  @Mutation(() => Post)
-  removePost(@Args('id', { type: () => Int }) id: number) {
+  @Mutation(() => PostObject)
+  @UseGuards(GqlAuthGuard)
+  async updatePost(
+    @GqlCurrentUser() user: User,
+    @Args('input') input: UpdatePostInput,
+  ) {
+    const post = await this.postsService.findOne(input.id);
+    if (post.author.id !== user.id) {
+      throw new UnauthorizedException("You aren't the author of this post.");
+    }
+    return this.postsService.update(input.id, input);
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(GqlAuthGuard)
+  async deletePost(
+    @GqlCurrentUser() user: User,
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    const post = await this.postsService.findOne(id);
+    if (post.author.id !== user.id) {
+      throw new UnauthorizedException("You aren't the author of this post.");
+    }
     return this.postsService.remove(id);
+  }
+
+  @ResolveField(() => UserObject)
+  async author(@Parent() post: Post) {
+    if (post.author) {
+      return post.author;
+    }
+    // return await this.usersService.findOne({ postId: post.id });
   }
 }

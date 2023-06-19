@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Req, UseGuards } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -13,7 +13,8 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  async findAll(): Promise<UserDto[]> {
+  async findAll(@Req() req: Request): Promise<UserDto[]> {
+    console.log('Request:', req);
     const users = await this.usersService.findAll();
     users.map((user) => {
       const modifiedUser = { ...user } as any;

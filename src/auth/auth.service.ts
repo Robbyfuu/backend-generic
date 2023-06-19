@@ -25,20 +25,25 @@ export class AuthService {
     private readonly refreshTokenModel: Model<RefreshToken>,
   ) {}
 
-  // async validateUser(email: string, pass: string): Promise<any> {
-  //   const user = await this.usersService.findOne({ email });
-  //   if (user) {
-  //     if (!user.isActive) {
-  //       throw new UnauthorizedException(`User is inactive, talk with an admin`);
-  //     }
-  //     const { password, ...result } = user;
-  //     const match = await bcrypt.compare(pass, password);
-  //     if (match) {
-  //       return result;
-  //     }
-  //   }
-  //   return null;
-  // }
+  async validateUserWithPassword(
+    email: string,
+    pass: string,
+  ): Promise<UserDto> {
+    const user = await this.usersService.findOne({ email });
+    if (user) {
+      if (!user.isActive) {
+        throw new UnauthorizedException(`User is inactive, talk with an admin`);
+      }
+      const { password, ...result } = user;
+      const match = await bcrypt.compare(pass, password);
+      delete user.password;
+      if (match) {
+        console.log('result', result);
+        return user;
+      }
+    }
+    return null;
+  }
   async validateUser(id: string): Promise<UserDto> {
     const user = await this.usersService.findOne({ id });
 
@@ -80,7 +85,6 @@ export class AuthService {
   async resolveRefreshToken(encoded: string) {
     try {
       const payload = await this.jwtService.verify(encoded);
-      console.log(payload);
       if (!payload.sub || !payload.jwtId) {
         throw new UnprocessableEntityException('Refresh token malformed');
       }
@@ -99,7 +103,6 @@ export class AuthService {
       }
 
       const user = await this.usersService.findOne({ id: payload.sub });
-      console.log(user)
       if (!user) {
         throw new UnprocessableEntityException('Refresh token malformed');
       }
@@ -151,5 +154,11 @@ export class AuthService {
       throw new Error('Invalid credentials');
     }
     return user;
+  }
+  async loginRefresh(user: any) {
+    const payload = { email: user.email, sub: user.userId };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }

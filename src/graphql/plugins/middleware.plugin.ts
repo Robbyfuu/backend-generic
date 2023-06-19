@@ -7,19 +7,16 @@ export const myPlugin = {
     logger.log('ApolloServer is starting up...');
   },
   async requestDidStart(requestContext) {
-    // console.log(requestContext);
-    const req = requestContext.contextValue.req; // Obtén la solicitud HTTP
+    const req = requestContext.contextValue.req;
 
     // Extraer el token de los headers de la solicitud
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      // console.log('No token provided');
       throw new Error('No token provided');
     }
 
-    const token = authHeader.split(' ')[1]; // Suponiendo que estás usando el formato "Bearer <token>"
+    const token = authHeader.split(' ')[1];
 
-    // console.log('Token', token);
     const jwtService = new JwtService({
       secret: 'ThisIsMySecret',
       signOptions: { expiresIn: '7d' },

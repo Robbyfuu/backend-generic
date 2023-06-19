@@ -1,13 +1,7 @@
-import { Module } from '@nestjs/common';
-import { join } from 'path';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  ApolloServerPluginLandingPageLocalDefault,
-  ApolloServerPluginLandingPageProductionDefault,
-} from '@apollo/server/plugin/landingPage/default';
+// import { MorganMiddleware } from '@nest-middlewares/morgan';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -15,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import configuration from './config/configuration';
 import { GraphqlModule } from './graphql/graphql.module';
+import { MorganMiddleware } from './middlewares/morgan.middleware';
 
 @Module({
   imports: [
@@ -31,4 +26,8 @@ import { GraphqlModule } from './graphql/graphql.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MorganMiddleware).forRoutes('*');
+  }
+}

@@ -20,7 +20,7 @@ import { UsersModule } from 'src/users/users.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('auth.jwtKey'),
-        signOptions: { expiresIn: '15m' },
+        signOptions: { expiresIn: '12h' },
       }),
       inject: [ConfigService],
     }),

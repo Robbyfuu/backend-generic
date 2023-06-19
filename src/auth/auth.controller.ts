@@ -1,10 +1,17 @@
-import { Body, Controller, Logger, Post, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Logger,
+  Post,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
 import { UserDto } from '../users/dto/user.dto';
 import { AuthService } from './auth.service';
 import { LoginUserBody } from './dto/login-user.body';
 import { LoginUserResponse } from './dto/login-user.response';
-import { RefreshTokenBody } from './dto/refresh-token.body';
 import { RefreshTokenResponse } from './dto/refresh-token.response';
 
 import { RegisterUserResponse } from './dto/register-user.response';
@@ -16,31 +23,30 @@ export class AuthController {
   logger = new Logger(AuthController.name);
   constructor(private authService: AuthService) {}
 
-  //@UseGuards(LocalAuthGuard)
+  @UseGuards(LocalAuthGuard)
   @Post('loginRefresh')
   @ApiBody({ type: LoginUserBody })
   @ApiOkResponse({
     description: 'User has been logged in.',
     type: LoginUserResponse,
   })
-  async loginRefresh(@Request() req) {
-    const accessToken = await this.authService.generateAccessToken(
-      req.headers.user,
-    );
+  async loginRefresh(@Request() req): Promise<LoginUserResponse> {
+    const accessToken = await this.authService.generateAccessToken(req.user);
     const refreshToken = await this.authService.generateRefreshToken(
-      req.headers.user,
-      1687119147,
+      req.user,
+      12 * 60 * 60 * 1000,
     );
-    const user = await this.authService.getUserFromToken(req.headers.user);
-
+    // const user = await this.authService.getUserFromToken(req.user);
+    delete req.user._doc.password;
     const payload = new LoginUserResponse();
-    payload.user = user;
+    payload.user = req.user;
     payload.accessToken = accessToken;
     payload.refreshToken = refreshToken;
 
     return payload;
+    // return this.authService.loginRefresh(req.user);
   }
-  // @UseGuards(LocalAuthGuard)
+  //@UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiBody({ type: LoginUserBody })
   @ApiOkResponse({
@@ -52,7 +58,7 @@ export class AuthController {
     const accessToken = await this.authService.generateAccessToken(user);
     const refreshToken = await this.authService.generateRefreshToken(
       user,
-      1687119147,
+      12 * 60 * 60 * 1000,
     );
 
     const payload = new LoginUserResponse();
@@ -89,7 +95,6 @@ export class AuthController {
     type: RegisterUserResponse,
   })
   async register(@Body() registerInput: RegisterUserBody) {
-    console.log(registerInput);
     const user = await this.authService.register(
       registerInput.email,
       registerInput.password,
@@ -97,7 +102,7 @@ export class AuthController {
     const accessToken = await this.authService.generateAccessToken(user);
     const refreshToken = await this.authService.generateRefreshToken(
       user,
-      1687119147,
+      12 * 60 * 60 * 1000,
     );
     const payload = new RegisterUserResponse();
     payload.user = user;

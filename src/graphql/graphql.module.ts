@@ -17,7 +17,7 @@ import { AuthModule } from 'src/auth/auth.module';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false,
       plugins: [
-        myPlugin,
+        // myPlugin,
         process.env.NODE_ENV === 'prod'
           ? ApolloServerPluginLandingPageProductionDefault({ footer: false })
           : ApolloServerPluginLandingPageLocalDefault({ embed: true }),
