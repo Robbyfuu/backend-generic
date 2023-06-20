@@ -14,7 +14,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from 'src/users/entities/user.entity';
 import { LoginUserBody, RegisterUserBody } from './dto';
 import { UserDto } from 'src/users/dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+
 @Injectable()
 export class AuthService {
   logger = new Logger('AuthService');
@@ -34,11 +34,10 @@ export class AuthService {
       if (!user.isActive) {
         throw new UnauthorizedException(`User is inactive, talk with an admin`);
       }
-      const { password, ...result } = user;
+      const { password } = user;
       const match = await bcrypt.compare(pass, password);
       delete user.password;
       if (match) {
-        console.log('result', result);
         return user;
       }
     }
@@ -53,12 +52,12 @@ export class AuthService {
     return user;
   }
 
-  async generateAccessToken(user: Pick<User, '_id'>) {
-    const payload = { sub: String(user._id) };
+  async generateAccessToken(user: Pick<User, 'id'>) {
+    const payload = { sub: String(user.id) };
     return await this.jwtService.signAsync(payload);
   }
 
-  async createRefreshToken(user: Pick<User, '_id'>, ttl: number) {
+  async createRefreshToken(user: Pick<User, 'id'>, ttl: number) {
     const expiration = new Date();
     expiration.setTime(expiration.getTime() + ttl);
 
@@ -72,9 +71,9 @@ export class AuthService {
     return token;
   }
 
-  async generateRefreshToken(user: Pick<User, '_id'>, expiresIn: number) {
-    const payload = { sub: String(user._id) };
-    const token = await this.createRefreshToken(user._id, expiresIn);
+  async generateRefreshToken(user: Pick<User, 'id'>, expiresIn: number) {
+    const payload = { sub: String(user.id) };
+    const token = await this.createRefreshToken(user.id, expiresIn);
     return await this.jwtService.signAsync({
       ...payload,
       expiresIn,

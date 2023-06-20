@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
+import * as timestamp from 'mongoose-timestamp';
 import { RefreshToken } from '../../auth/entities/refresh-token.entity';
 import { Post } from 'src/posts/entities/post.entity';
 
@@ -28,10 +29,11 @@ export class User extends mongoose.Document {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-// UserSchema.set('toJSON', {
-//   virtuals: true,
-//   versionKey: false,
-//   transform: function (_doc, ret) {
-//     delete ret._id;
-//   },
-// });
+UserSchema.set('toJSON', {
+  virtuals: true,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+  },
+});
+UserSchema.plugin(timestamp);

@@ -7,16 +7,16 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User } from './entities/user.entity';
 import { UpdateProfileDto, UpdateProfileInput } from './dto';
 import { RegisterUserBody } from 'src/auth/dto';
 import { UserDto } from './dto/user.dto';
-function filterUser(user: any): any {
-  return user._doc;
-}
 
-interface FindOneArgs {
+interface FindAllArgs {
+  relations?: string[];
+}
+interface FindOneArgs extends FindAllArgs {
   id?: string;
   email?: string;
   postId?: number;
@@ -46,15 +46,18 @@ export class UsersService {
     return users;
   }
 
-  async findOne({ id, email, postId }: FindOneArgs): Promise<User> {
+  async findOne({ id, email, postId, relations }: FindOneArgs): Promise<User> {
     if (id) {
       return await this.usersModel.findById(id);
     } else if (email) {
       return await this.usersModel.findOne({
         email: { $regex: new RegExp('^' + email + '$', 'i') },
       });
-      // } else if (postId) {
-      //   return this.usersModel.findOne({ posts: { id: postId } });
+    } else if (postId) {
+      console.log('postId', postId);
+      return await this.usersModel
+        .findOne({ posts: new Types.ObjectId(postId) })
+        .populate(relations);
     } else {
       throw new Error('One of ID, email or post ID must be provided.');
     }

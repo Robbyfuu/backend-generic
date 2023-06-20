@@ -1,9 +1,9 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 
 @ObjectType('User')
 export class UserObject {
   @Field(() => ID)
-  readonly _id: string;
+  readonly id: string;
 
   @Field(() => String)
   readonly email: string;
@@ -13,4 +13,9 @@ export class UserObject {
 
   @Field({ nullable: true })
   readonly lastName: string;
+  @Field()
+  readonly createdAt: Date;
+
+  @Field()
+  readonly updatedAt: Date;
 }

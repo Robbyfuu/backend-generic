@@ -3,5 +3,5 @@ import { UserObject } from './user.object';
 
 @InputType()
 export class UpdateProfileInput extends PartialType(
-  OmitType(UserObject, ['_id'] as const, InputType),
+  OmitType(UserObject, ['id'] as const, InputType),
 ) {}

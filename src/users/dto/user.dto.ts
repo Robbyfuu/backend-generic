@@ -13,7 +13,7 @@ export class UserDto {
   @Expose()
   @ApiProperty()
   @Transform(({ value }) => value.toString(), { toPlainOnly: true }) // Transformar ObjectId a cadena
-  readonly _id?: string;
+  readonly id?: string;
 
   @Expose()
   @ApiProperty()

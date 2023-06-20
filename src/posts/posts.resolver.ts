@@ -1,4 +1,4 @@
-import { Selections } from '@jenyus-org/nestjs-graphql-utils';
+// Packages
 import { UnauthorizedException, UseGuards } from '@nestjs/common';
 import {
   Args,
@@ -9,45 +9,63 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-// import { UsersService } from 'src/users/users.service';
+// Services
+import { UsersService } from 'src/users/users.service';
+import { PostsService } from './posts.service';
+//Decorators
 import { GqlCurrentUser } from '../auth/decorator/gql-current-user.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
-import { UserObject } from '../users/dto/user.object';
+// Entities
 import { User } from '../users/entities/user.entity';
-import { CreatePostInput } from './dto/create-post.input';
-import { PostObject } from './dto/post.object';
-import { UpdatePostInput } from './dto/update-post.input';
 import { Post } from './entities/post.entity';
-import { PostsService } from './posts.service';
+// DTOs
+import { UserObject } from '../users/dto/user.object';
+import {
+  FetchPostArgs,
+  PostObject,
+  CreatePostInput,
+  UpdatePostInput,
+} from './dto';
 
 @Resolver(() => PostObject)
 export class PostsResolver {
   constructor(
-    private readonly postsService: PostsService, // private usersService: UsersService,
+    private readonly postsService: PostsService,
+    private usersService: UsersService,
   ) {}
 
   @Query(() => [PostObject])
-  posts(@Selections('posts', ['author']) relations: string[]) {
-    return this.postsService.findAll({ relations });
+  async posts(
+    @Args() { offset, limit }: FetchPostArgs,
+    @Args('authorId', { nullable: true }) authorId: string,
+  ): Promise<Post[]> {
+    return this.postsService.findAll({ offset, limit });
+  }
+  @Query(() => [PostObject])
+  async postsByAuthorId(
+    @Args('authorId', { type: () => ID }) authorId: string,
+  ): Promise<Post[]> {
+    return this.postsService.findAllByAuthorId(authorId);
   }
 
   @Query(() => PostObject)
-  post(
-    @Selections('post', ['author']) relations: string[],
-    @Args('id', { type: () => ID }) id: string,
-  ) {
+  async post(@Args('id', { type: () => ID }) id: string) {
     return this.postsService.findOne(id);
+  }
+  @Query(() => [PostObject])
+  @UseGuards(GqlAuthGuard)
+  async myPosts(@GqlCurrentUser() user: User) {
+    return this.postsService.findAllByAuthorId(user.id);
   }
 
   @Mutation(() => PostObject)
   @UseGuards(GqlAuthGuard)
-  createPost(
+  async createPost(
     @GqlCurrentUser() user: User,
     @Args('input') input: CreatePostInput,
   ) {
-    console.log(user.id);
-    console.log(input);
-    return this.postsService.create(user.id, input);
+    console.log('user', typeof user.id);
+    return await this.postsService.create(user.id, input);
   }
 
   @Mutation(() => PostObject)
@@ -79,8 +97,8 @@ export class PostsResolver {
   @ResolveField(() => UserObject)
   async author(@Parent() post: Post) {
     if (post.author) {
-      return post.author;
+      return this.usersService.findOne({ id: post.author.toString() });
     }
-    // return await this.usersService.findOne({ postId: post.id });
+    return await this.usersService.findOne({ postId: post.id });
   }
 }
