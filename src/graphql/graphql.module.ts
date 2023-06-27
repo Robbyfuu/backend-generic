@@ -16,14 +16,17 @@ import { AuthModule } from 'src/auth/auth.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false,
+      // uploads: true,
       plugins: [
         // myPlugin,
         process.env.NODE_ENV === 'prod'
           ? ApolloServerPluginLandingPageProductionDefault({ footer: false })
           : ApolloServerPluginLandingPageLocalDefault({ embed: true }),
       ],
+     /*  resolvers: { Upload: UploadScalar }, */
     }),
     AuthModule,
   ],
+  providers: [],
 })
 export class GraphqlModule {}

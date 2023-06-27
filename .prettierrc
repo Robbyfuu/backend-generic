@@ -1,4 +1,6 @@
 {
   "singleQuote": true,
-  "trailingComma": "all"
+  "endOfLine": "crlf",
+  "trailingComma": "all",
+  "comma-dangle": ["error", "always-multiline"]
 }

@@ -23,11 +23,11 @@ interface FindOneArgs extends FindAllArgs {
 }
 @Injectable()
 export class UsersService {
-  private logger: Logger = new Logger('UsersService');
   constructor(
     @InjectModel(User.name)
     private readonly usersModel: Model<User>,
   ) {}
+  private logger: Logger = new Logger('UsersService');
   async create(createUserInput: RegisterUserBody): Promise<User> {
     try {
       const user = this.usersModel.create({

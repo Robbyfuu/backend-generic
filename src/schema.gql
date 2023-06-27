@@ -25,17 +25,27 @@ type Post {
   author: User!
 }
 
+type Product {
+  id: ID!
+  productName: String!
+  productPrice: Float!
+  productImage: String!
+  productUnit: String!
+}
+
 type Query {
   posts(offset: Int = 0, limit: Int = 25, authorId: String): [Post!]!
   postsByAuthorId(authorId: ID!): [Post!]!
   post(id: ID!): Post!
   myPosts: [Post!]!
+  products(offset: Int = 0, limit: Int = 25): [Product!]!
 }
 
 type Mutation {
   createPost(input: CreatePostInput!): Post!
   updatePost(input: UpdatePostInput!): Post!
   deletePost(id: ID!): Boolean!
+  createProduct(input: CreateProductInput, file: Upload!): Product!
 }
 
 input CreatePostInput {
@@ -48,3 +58,12 @@ input UpdatePostInput {
   body: String
   id: ID!
 }
+
+input CreateProductInput {
+  productName: String!
+  productPrice: Float!
+  productUnit: String!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload

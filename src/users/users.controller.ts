@@ -31,7 +31,7 @@ export class UsersController {
     return users;
   }
 
-  @Get(':email')
+  @Get('/find/:email')
   async findOne(@Param('email') email: string) {
     const user = await this.usersService.findOne({ email });
     return user && new UserDto(user);
@@ -44,16 +44,17 @@ export class UsersController {
     @Body() updateUserDto: UpdateProfileDto,
   ) {
     const res = await this.usersService.update(user.id, updateUserDto);
-    return res && new UserDto(res);
+    return res;
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('me')
+  @Get('/me')
   @ApiOkResponse({
     description: 'Returns the logged-in user.',
     type: UserDto,
   })
   getProfile(@CurrentUser() user: User) {
-    return user && new UserDto(user);
+    delete user.password;
+    return user;
   }
 }

@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
+// @ts-ignore
+import { graphqlUploadExpress } from 'graphql-upload';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +12,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
   );
+  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
   app.use(
     helmet({
       crossOriginEmbedderPolicy: false,
