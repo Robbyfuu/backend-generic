@@ -15,7 +15,7 @@ import {
 // import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { cloudinary } from 'src/cloudinary/cloudinary.config';
 // @ts-ignore
-import { GraphQLUpload, FileUpload } from 'graphql-upload';
+import { FileUpload } from 'graphql-upload';
 
 @Injectable()
 export class ProductsService {
@@ -28,32 +28,33 @@ export class ProductsService {
     createProductInput: CreateProductInput,
     file: FileUpload,
   ): Promise<Product> {
-    console.log('entre');
+  
     const imageUrl = (await this.uploadImageToCloudinary(file)) as string;
 
-    console.log({ imageUrl });
     const createInput = {
       productName: createProductInput.productName,
       productPrice: createProductInput.productPrice,
       productImage: imageUrl,
       productUnit: createProductInput.productUnit,
+      productInventory: createProductInput.productInventory,
+      productCategory: createProductInput.productCategory,
     } as Product;
-    console.log({ createInput });
     const product = await this.productModel.create(createInput); // Asume que estás usando TypeORM o Mongoose para crear una nueva instancia de producto
-
-    console.log({ product });
     return product;
   }
 
-  findAll(args?: FetchProductArgs) {
+  async findAll(args?: FetchProductArgs) {
     const { offset, limit } = args;
-    return this.productModel.find().skip(offset).limit(limit);
+    return await this.productModel.find().skip(offset).limit(limit);
+  }
+  async countProducts(){
+    return await this.productModel.countDocuments();
   }
 
   async uploadImageToCloudinary(file) {
     return new Promise((resolve, reject) => {
       const { createReadStream, mimetype } = file;
-      const cloudinaryStream = cloudinary.uploader.upload_stream(
+      const cloudinaryStream = cloudinary.uploader.upload_stream( {folder: 'verduras'}, // 'verduras' es el nombre de la carpeta en cloudinary
         (error, result) => {
           if (result) {
             resolve(result.secure_url as string);

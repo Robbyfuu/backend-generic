@@ -30,6 +30,8 @@ type Product {
   productName: String!
   productPrice: Float!
   productImage: String!
+  productInventory: Float!
+  productCategory: String!
   productUnit: String!
 }
 
@@ -39,6 +41,7 @@ type Query {
   post(id: ID!): Post!
   myPosts: [Post!]!
   products(offset: Int = 0, limit: Int = 25): [Product!]!
+  countProducts: Float!
 }
 
 type Mutation {
@@ -62,6 +65,8 @@ input UpdatePostInput {
 input CreateProductInput {
   productName: String!
   productPrice: Float!
+  productInventory: Float!
+  productCategory: String!
   productUnit: String!
 }
 

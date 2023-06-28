@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { InputType, Field } from '@nestjs/graphql';
-import { IsNotEmpty, IsNumber, IsString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString,  } from 'class-validator';
 
 
 @InputType()
@@ -16,6 +16,15 @@ export class CreateProductInput {
 
   // @Field(() => UploadScalar)
   // productImage: string;
+  @Field(() => Number)
+  @IsNotEmpty()
+  @IsNumber()
+  productInventory: number;
+
+  @Field(() => String)
+  @IsNotEmpty()
+  @IsString()
+  productCategory: string;
 
   @Field(() => String)
   @IsNotEmpty()

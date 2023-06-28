@@ -15,5 +15,10 @@ export class ProductObject {
   readonly productImage: string;
 
   @Field()
+  readonly productInventory: number;
+  @Field()
+  readonly productCategory: string;
+
+  @Field()
   readonly productUnit: string;
 }

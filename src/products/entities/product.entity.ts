@@ -1,5 +1,4 @@
 /* eslint-disable prettier/prettier */
-import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import * as timestamp from 'mongoose-timestamp';
@@ -14,6 +13,12 @@ export class Product extends mongoose.Document {
 
   @Prop()
   productImage: string;
+
+  @Prop()
+  productInventory: number;
+
+  @Prop()
+  productCategory: string;
 
   @Prop()
   productUnit: string;

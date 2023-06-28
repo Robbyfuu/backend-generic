@@ -64,7 +64,6 @@ export class PostsResolver {
     @GqlCurrentUser() user: User,
     @Args('input') input: CreatePostInput,
   ) {
-    console.log('user', typeof user.id);
     return await this.postsService.create(user.id, input);
   }
 

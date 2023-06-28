@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable prettier/prettier */
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
-import { UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Resolver, Query, Mutation, Args,  } from '@nestjs/graphql';
+import {  UseGuards } from '@nestjs/common';
+// import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
-import { createWriteStream } from 'fs';
-// import { CreateProductInput } from './dto/create-product.input';
-// import { UpdateProductInput } from './dto/update-product.input';
+
 import { ProductObject, CreateProductInput, FetchProductArgs } from './dto';
 import { GqlAuthGuard } from 'src/auth/guards';
 // @ts-ignore
@@ -24,11 +22,6 @@ export class ProductsResolver {
     @Args('file', { type: () => GraphQLUpload })
     file: FileUpload,
   ) {
-    console.log('entre1');
-    console.log();
-    // const file = createReadStream().pipe(
-    //   createWriteStream(`./uploads/${filename}`),
-    // );
     return await this.productsService.create(createProductInput, file);
   }
 
@@ -38,6 +31,11 @@ export class ProductsResolver {
     @Args() { offset, limit }: FetchProductArgs,
   ): Promise<Product[]> {
     return await this.productsService.findAll({ offset, limit });
+  }
+  @Query(() => Number, { name: 'countProducts' })
+  @UseGuards(GqlAuthGuard)
+  async countProducts(): Promise<number> {
+    return await this.productsService.countProducts();
   }
 
   // @Query(() => Product, { name: 'product' })

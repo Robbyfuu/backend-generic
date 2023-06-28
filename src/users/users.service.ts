@@ -54,7 +54,6 @@ export class UsersService {
         email: { $regex: new RegExp('^' + email + '$', 'i') },
       });
     } else if (postId) {
-      console.log('postId', postId);
       return await this.usersModel
         .findOne({ posts: new Types.ObjectId(postId) })
         .populate(relations);
