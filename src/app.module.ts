@@ -14,6 +14,7 @@ import { MorganMiddleware } from './middlewares/morgan.middleware';
 import { ProductsModule } from './products/products.module';
 import * as express from 'express';
 // import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { OrdersModule } from './orders/orders.module';
 import * as multer from 'multer';
 
 @Module({
@@ -31,6 +32,7 @@ import * as multer from 'multer';
     UsersModule,
     PostsModule,
     ProductsModule,
+    OrdersModule,
     /* CloudinaryModule */
   ],
   controllers: [AppController],

@@ -35,6 +35,11 @@ type Product {
   productUnit: String!
 }
 
+type Order {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 type Query {
   posts(offset: Int = 0, limit: Int = 25, authorId: String): [Post!]!
   postsByAuthorId(authorId: ID!): [Post!]!
@@ -42,6 +47,8 @@ type Query {
   myPosts: [Post!]!
   products(offset: Int = 0, limit: Int = 25): [Product!]!
   countProducts: Float!
+  orders: [Order!]!
+  order(id: Int!): Order!
 }
 
 type Mutation {
@@ -49,6 +56,9 @@ type Mutation {
   updatePost(input: UpdatePostInput!): Post!
   deletePost(id: ID!): Boolean!
   createProduct(input: CreateProductInput, file: Upload!): Product!
+  createOrder(createOrderInput: CreateOrderInput!): Order!
+  updateOrder(updateOrderInput: UpdateOrderInput!): Order!
+  removeOrder(id: Int!): Order!
 }
 
 input CreatePostInput {
@@ -72,3 +82,14 @@ input CreateProductInput {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input CreateOrderInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateOrderInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
