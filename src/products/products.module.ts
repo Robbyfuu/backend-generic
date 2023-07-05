@@ -12,6 +12,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
     // CloudinaryModule
   ],
+  exports: [ProductsService],
 })
 export class ProductsModule {}
 

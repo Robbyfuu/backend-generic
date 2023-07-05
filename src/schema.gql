@@ -33,11 +33,18 @@ type Product {
   productInventory: Float!
   productCategory: String!
   productUnit: String!
+  cartquantity: Float
 }
 
 type Order {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  id: ID!
+  paymentMethod: String!
+  total: Float!
+  createdAt: DateTime!
+  authorizationCode: String!
+  products: [Product!]!
+  updatedAt: DateTime!
+  seller: User!
 }
 
 type Query {
@@ -84,12 +91,21 @@ input CreateProductInput {
 scalar Upload
 
 input CreateOrderInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  paymentMethod: String!
+  total: Int!
+  products: [OrderProducts!]!
+  authorizationCode: String
+}
+
+input OrderProducts {
+  id: ID!
+  cartQuantity: Float!
 }
 
 input UpdateOrderInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+  paymentMethod: String
+  total: Int
+  products: [OrderProducts!]
+  authorizationCode: String
+  id: ID!
 }

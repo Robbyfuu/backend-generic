@@ -1,11 +1,30 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrderInput } from './dto/create-order.input';
 import { UpdateOrderInput } from './dto/update-order.input';
+import { Order } from './entities/order.entity';
+import { Model, Types } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class OrdersService {
-  create(createOrderInput: CreateOrderInput) {
-    return 'This action adds a new order';
+  constructor(
+    @InjectModel(Order.name)
+    private readonly orderModel: Model<Order>,
+  ) {}
+
+  async create(createOrderInput: CreateOrderInput, userId: string) {
+    const productIds = createOrderInput.products.map(
+      (product) => new Types.ObjectId(product.id),
+    );
+    const order = await this.orderModel.create({
+      seller: userId,
+      products: productIds,
+      paymentMethod: createOrderInput.paymentMethod,
+      total: createOrderInput.total,
+    });
+
+    // await order.save();
+    return order;
   }
 
   findAll() {
@@ -24,3 +43,4 @@ export class OrdersService {
     return `This action removes a #${id} order`;
   }
 }
+

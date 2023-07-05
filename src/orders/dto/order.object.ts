@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { ProductObject } from 'src/products/dto';
 import { Product } from 'src/products/entities/product.entity';
 
 @ObjectType('Order')
@@ -18,8 +19,8 @@ export class OrderObject {
   @Field()
   readonly authorizationCode: string;
 
-  @Field(() => [Product])
-  readonly products: Product[];
+  @Field(() => [ProductObject])
+  readonly products: ProductObject[];
 
   @Field()
   readonly updatedAt: Date;

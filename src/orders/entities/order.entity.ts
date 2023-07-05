@@ -6,7 +6,7 @@ import { Product } from 'src/products/entities/product.entity';
 
 @Schema()
 export class Order extends mongoose.Document {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Product' })
+  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }])
   products: Product[];
 
   @Prop()

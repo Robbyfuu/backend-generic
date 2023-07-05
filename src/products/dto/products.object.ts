@@ -21,4 +21,7 @@ export class ProductObject {
 
   @Field()
   readonly productUnit: string;
+
+  @Field(() => Number, { nullable: true })
+  cartquantity?: number;
 }

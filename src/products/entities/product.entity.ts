@@ -22,6 +22,8 @@ export class Product extends mongoose.Document {
 
   @Prop()
   productUnit: string;
+
+  cartQuantity: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

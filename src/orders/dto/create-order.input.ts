@@ -1,6 +1,6 @@
-import { InputType, Int, Field } from '@nestjs/graphql';
+import { InputType, Int, Field, ID, Float } from '@nestjs/graphql';
 import { IsNotEmpty } from 'class-validator';
-import { Product } from 'src/products/entities/product.entity';
+import { ObjectId } from 'mongoose';
 
 @InputType()
 export class CreateOrderInput {
@@ -12,10 +12,19 @@ export class CreateOrderInput {
   @IsNotEmpty()
   total: number;
 
-  @Field(() => [Product])
+  @Field(() => [OrderProducts])
   @IsNotEmpty()
-  products: Product[];
+  products: [OrderProducts];
 
   @Field(() => String, { nullable: true })
   authorizationCode?: string;
+}
+
+@InputType()
+class OrderProducts {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => Float)
+  cartQuantity: number;
 }

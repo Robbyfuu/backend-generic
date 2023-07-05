@@ -17,12 +17,14 @@ import { User } from 'src/users/entities/user.entity';
 import { ProductObject } from 'src/products/dto';
 import { UserObject } from 'src/users/dto';
 import { UsersService } from 'src/users/users.service';
+import { ProductsService } from 'src/products/products.service';
 
 @Resolver(() => OrderObject)
 export class OrdersResolver {
   constructor(
     private readonly ordersService: OrdersService,
     private usersService: UsersService,
+    private productsService: ProductsService,
   ) {}
 
   @Mutation(() => OrderObject)
@@ -31,7 +33,7 @@ export class OrdersResolver {
     @GqlCurrentUser() user: User,
     @Args('createOrderInput') createOrderInput: CreateOrderInput,
   ) {
-    return this.ordersService.create(createOrderInput);
+    return this.ordersService.create(createOrderInput, user.id);
   }
 
   @Query(() => [OrderObject], { name: 'orders' })
@@ -55,10 +57,17 @@ export class OrdersResolver {
   }
   @ResolveField(() => ProductObject)
   async products(@Parent() order: Order) {
-    return order.products;
+    if (order.products) {
+      return await this.productsService.getProductsByIds(order.products);
+    }
+    const products = [];
+    for (let i = 0; i < order.products.length; i++) {
+      products.push(await this.productsService.findOne(order.products[i].id));
+    }
+    return products;
   }
   @ResolveField(() => UserObject)
-  async author(@Parent() order: Order) {
+  async seller(@Parent() order: Order) {
     if (order.seller) {
       return this.usersService.findOne({ id: order.seller.toString() });
     }
