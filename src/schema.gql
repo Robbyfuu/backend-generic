@@ -54,6 +54,7 @@ type Query {
   myPosts: [Post!]!
   products(offset: Int = 0, limit: Int = 25): [Product!]!
   countProducts: Float!
+  product(id: ID!): Product!
   orders: [Order!]!
   order(id: Int!): Order!
 }
@@ -63,6 +64,8 @@ type Mutation {
   updatePost(input: UpdatePostInput!): Post!
   deletePost(id: ID!): Boolean!
   createProduct(input: CreateProductInput, file: Upload!): Product!
+  updateProduct(input: UpdateProductInput!, ID: ID!): Product!
+  updateProductInventory(input: UpdateProductInput!, ID: ID!, typeOperation: String!): Product!
   createOrder(createOrderInput: CreateOrderInput!): Order!
   updateOrder(updateOrderInput: UpdateOrderInput!): Order!
   removeOrder(id: Int!): Order!
@@ -89,6 +92,14 @@ input CreateProductInput {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input UpdateProductInput {
+  productName: String
+  productPrice: Float
+  productInventory: Float
+  productCategory: String
+  productUnit: String
+}
 
 input CreateOrderInput {
   paymentMethod: String!

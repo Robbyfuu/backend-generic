@@ -1,9 +1,5 @@
-/* eslint-disable prettier/prettier */
 import { CreateProductInput } from './create-product.input';
-import { InputType, Field, PartialType } from '@nestjs/graphql';
+import { InputType, Field, PartialType, ID } from '@nestjs/graphql';
 
 @InputType()
-export class UpdateProductInput extends PartialType(CreateProductInput) {
-  @Field(() => String)
-  id: string;
-}
+export class UpdateProductInput extends PartialType(CreateProductInput) {}

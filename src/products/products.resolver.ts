@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable prettier/prettier */
-import { Resolver, Query, Mutation, Args,  } from '@nestjs/graphql';
-import {  UseGuards } from '@nestjs/common';
+import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 // import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 
-import { ProductObject, CreateProductInput, FetchProductArgs } from './dto';
+import {
+  ProductObject,
+  CreateProductInput,
+  FetchProductArgs,
+  UpdateProductInput,
+} from './dto';
 import { GqlAuthGuard } from 'src/auth/guards';
 // @ts-ignore
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
@@ -38,15 +43,27 @@ export class ProductsResolver {
     return await this.productsService.countProducts();
   }
 
-  // @Query(() => Product, { name: 'product' })
-  // findOne(@Args('id', { type: () => Int }) id: number) {
-  //   return this.productsService.findOne(id);
-  // }
+  @Query(() => ProductObject, { name: 'product' })
+  findOne(@Args('id', { type: () => ID }) id: string) {
+    return this.productsService.findOne(id);
+  }
 
-  // @Mutation(() => Product)
-  // updateProduct(@Args('updateProductInput') updateProductInput: UpdateProductInput) {
-  //   return this.productsService.update(updateProductInput.id, updateProductInput);
-  // }
+  @Mutation(() => ProductObject)
+  updateProduct(
+    @Args('input') updateProductInput: UpdateProductInput,
+    @Args('ID', { type: () => ID }) id: string,
+  ) {
+
+    return this.productsService.update(id, updateProductInput);
+  }
+  @Mutation(() => ProductObject)
+  async updateProductInventory(
+    @Args('input') updateProductInput: UpdateProductInput,
+    @Args('ID', { type: () => ID }) id: string,
+    @Args('typeOperation') typeOperation: string,
+  ) {
+    return await this.productsService.updateInventory(id, updateProductInput, typeOperation);
+  }
 
   // @Mutation(() => Product)
   // removeProduct(@Args('id', { type: () => Int }) id: number) {

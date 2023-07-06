@@ -4,15 +4,24 @@ import { UpdateOrderInput } from './dto/update-order.input';
 import { Order } from './entities/order.entity';
 import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { ProductsService } from 'src/products/products.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name)
     private readonly orderModel: Model<Order>,
+    private readonly productService: ProductsService,
   ) {}
 
   async create(createOrderInput: CreateOrderInput, userId: string) {
+    createOrderInput.products.forEach((product) => {
+      this.productService.updateInventory(
+        product.id,
+        { productInventory: product.cartQuantity },
+        'sell',
+      );
+    });
     const productIds = createOrderInput.products.map(
       (product) => new Types.ObjectId(product.id),
     );
@@ -43,4 +52,3 @@ export class OrdersService {
     return `This action removes a #${id} order`;
   }
 }
-

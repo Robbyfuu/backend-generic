@@ -95,8 +95,29 @@ export class ProductsService {
     return product.save();
   }
 
+  async updateInventory(
+    id: string,
+    updateProductInput: UpdateProductInput,
+    typeOperation: string,
+  ) {
+    const product = await this.productModel.findById(id);
+    if (!product) {
+      throw new Error('Product not found');
+    }
+    // ver el inventario actual
+    const currentInventory = product.productInventory;
+    if (typeOperation === 'add') {
+      const newInventory =
+        currentInventory + updateProductInput.productInventory;
+      product.set({ productInventory: newInventory });
+    } else if (typeOperation === 'sell') {
+      const newInventory =
+        currentInventory - updateProductInput.productInventory;
+      product.set({ productInventory: newInventory });
+    }
+    return product.save();
+  }
   // remove(id: string) {
   //   return `This action removes a #${id} product`;
   // }
 }
-
