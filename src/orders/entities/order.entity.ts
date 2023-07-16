@@ -10,6 +10,9 @@ export class Order extends mongoose.Document {
   products: Product[];
 
   @Prop()
+  orderNumber: number;
+
+  @Prop()
   total: number;
 
   @Prop()

@@ -5,6 +5,7 @@ import { Order } from './entities/order.entity';
 import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ProductsService } from 'src/products/products.service';
+import { OrdersCounterService } from 'src/orders-counter/orders-counter.service';
 
 @Injectable()
 export class OrdersService {
@@ -12,6 +13,7 @@ export class OrdersService {
     @InjectModel(Order.name)
     private readonly orderModel: Model<Order>,
     private readonly productService: ProductsService,
+    private readonly ordersCounterService: OrdersCounterService,
   ) {}
 
   async create(createOrderInput: CreateOrderInput, userId: string) {
@@ -22,6 +24,8 @@ export class OrdersService {
         'sell',
       );
     });
+    const nextOrderNumber =
+      await this.ordersCounterService.getNextSequenceValue('orderNumber');
     const productIds = createOrderInput.products.map(
       (product) => new Types.ObjectId(product.id),
     );
@@ -30,14 +34,15 @@ export class OrdersService {
       products: productIds,
       paymentMethod: createOrderInput.paymentMethod,
       total: createOrderInput.total,
+      orderNumber: nextOrderNumber,
     });
 
     // await order.save();
     return order;
   }
 
-  findAll() {
-    return `This action returns all orders`;
+  async findAll() {
+    return await this.orderModel.find();
   }
 
   findOne(id: number) {
@@ -52,3 +57,4 @@ export class OrdersService {
     return `This action removes a #${id} order`;
   }
 }
+

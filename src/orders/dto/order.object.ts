@@ -1,6 +1,5 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { ProductObject } from 'src/products/dto';
-import { Product } from 'src/products/entities/product.entity';
 
 @ObjectType('Order')
 export class OrderObject {
@@ -10,13 +9,16 @@ export class OrderObject {
   @Field()
   readonly paymentMethod: string;
 
+  @Field(() => Int)
+  readonly orderNumber: number;
+
   @Field()
   readonly total: number;
 
   @Field()
   readonly createdAt: Date;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   readonly authorizationCode: string;
 
   @Field(() => [ProductObject])

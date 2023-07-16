@@ -39,9 +39,10 @@ type Product {
 type Order {
   id: ID!
   paymentMethod: String!
+  orderNumber: Int!
   total: Float!
   createdAt: DateTime!
-  authorizationCode: String!
+  authorizationCode: String
   products: [Product!]!
   updatedAt: DateTime!
   seller: User!
