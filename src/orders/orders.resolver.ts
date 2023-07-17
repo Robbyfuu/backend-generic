@@ -14,17 +14,15 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/guards';
 import { GqlCurrentUser } from 'src/auth/decorator/gql-current-user.decorator';
 import { User } from 'src/users/entities/user.entity';
-import { ProductObject } from 'src/products/dto';
 import { UserObject } from 'src/users/dto';
 import { UsersService } from 'src/users/users.service';
-import { ProductsService } from 'src/products/products.service';
+import { ItemObject } from './dto/item-object';
 
 @Resolver(() => OrderObject)
 export class OrdersResolver {
   constructor(
     private readonly ordersService: OrdersService,
     private usersService: UsersService,
-    private productsService: ProductsService,
   ) {}
 
   @Mutation(() => OrderObject)
@@ -55,16 +53,11 @@ export class OrdersResolver {
   removeOrder(@Args('id', { type: () => Int }) id: number) {
     return this.ordersService.remove(id);
   }
-  @ResolveField(() => ProductObject)
+  @ResolveField(() => ItemObject)
   async products(@Parent() order: Order) {
     if (order.products) {
-      return await this.productsService.getProductsByIds(order.products);
+      return order.products;
     }
-    const products = [];
-    for (let i = 0; i < order.products.length; i++) {
-      products.push(await this.productsService.findOne(order.products[i].id));
-    }
-    return products;
   }
   @ResolveField(() => UserObject)
   async seller(@Parent() order: Order) {

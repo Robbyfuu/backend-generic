@@ -34,4 +34,8 @@ export class UserDto {
   @ApiProperty()
   @IsString()
   readonly lastName: string;
+
+  @Expose()
+  @ApiProperty()
+  readonly roles: string[];
 }

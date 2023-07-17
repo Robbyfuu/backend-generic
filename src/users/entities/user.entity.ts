@@ -3,6 +3,7 @@ import * as mongoose from 'mongoose';
 import * as timestamp from 'mongoose-timestamp';
 import { RefreshToken } from '../../auth/entities/refresh-token.entity';
 import { Post } from 'src/posts/entities/post.entity';
+import { Role } from 'src/auth/enums';
 
 @Schema()
 export class User extends mongoose.Document {
@@ -21,6 +22,9 @@ export class User extends mongoose.Document {
   @Prop({ default: true, type: Boolean })
   isActive: boolean;
 
+  @Prop()
+  roles: Role[];
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Post' })
   posts: mongoose.Types.ObjectId[] | Post[];
 
@@ -37,3 +41,4 @@ UserSchema.set('toJSON', {
   },
 });
 UserSchema.plugin(timestamp);
+

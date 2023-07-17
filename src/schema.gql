@@ -36,6 +36,15 @@ type Product {
   cartquantity: Float
 }
 
+type Item {
+  id: ID!
+  productName: String!
+  productPrice: Float!
+  productImage: String!
+  productUnit: String!
+  quantity: Float!
+}
+
 type Order {
   id: ID!
   paymentMethod: String!
@@ -43,7 +52,7 @@ type Order {
   total: Float!
   createdAt: DateTime!
   authorizationCode: String
-  products: [Product!]!
+  products: [Item!]!
   updatedAt: DateTime!
   seller: User!
 }

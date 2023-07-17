@@ -21,7 +21,7 @@ export class CreateOrderInput {
 }
 
 @InputType()
-class OrderProducts {
+export class OrderProducts {
   @Field(() => ID)
   id: string;
 

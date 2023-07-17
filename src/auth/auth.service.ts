@@ -14,6 +14,7 @@ import { RefreshToken } from './entities/refresh-token.entity';
 import { User } from 'src/users/entities/user.entity';
 import { LoginUserBody, RegisterUserBody } from './dto';
 import { UserDto } from 'src/users/dto';
+import { Role } from './enums';
 
 @Injectable()
 export class AuthService {
@@ -133,7 +134,13 @@ export class AuthService {
     return { user, token };
   }
 
-  async register(email: string, pass: string): Promise<User> {
+  async register(
+    email: string,
+    pass: string,
+    roles?: Role,
+    firstName?: string,
+    lastName?: string,
+  ): Promise<User> {
     const user = await this.usersService.findOne({ email });
     if (user) {
       // error user already exists
@@ -142,7 +149,11 @@ export class AuthService {
     const registerUserBody: RegisterUserBody = {
       email,
       password: pass,
+      roles: roles ? roles : Role.Seller,
+      firstName,
+      lastName,
     };
+
     const userResponse = await this.usersService.create(registerUserBody);
     return userResponse;
   }
@@ -161,3 +172,4 @@ export class AuthService {
     };
   }
 }
+

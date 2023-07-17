@@ -1,11 +1,14 @@
 import { Field, InputType } from '@nestjs/graphql';
 import {
   IsEmail,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
   MinLength,
+  IsEnum,
 } from 'class-validator';
+import { Role } from '../enums';
 
 export class RegisterUserBody {
   @IsEmail()
@@ -19,4 +22,15 @@ export class RegisterUserBody {
       'The password must have a Uppercase, lowercase letter and a number',
   })
   password: string;
+  @IsEnum(Role)
+  @IsOptional()
+  roles: Role;
+
+  @IsString()
+  @IsOptional()
+  firstName: string;
+
+  @IsString()
+  @IsOptional()
+  lastName: string;
 }

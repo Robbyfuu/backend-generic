@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CreateOrderInput } from './dto/create-order.input';
+import { CreateOrderInput, OrderProducts } from './dto/create-order.input';
 import { UpdateOrderInput } from './dto/update-order.input';
 import { Order } from './entities/order.entity';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ProductsService } from 'src/products/products.service';
 import { OrdersCounterService } from 'src/orders-counter/orders-counter.service';
+import { Item } from './entities/item.entity';
 
 @Injectable()
 export class OrdersService {
@@ -26,19 +27,32 @@ export class OrdersService {
     });
     const nextOrderNumber =
       await this.ordersCounterService.getNextSequenceValue('orderNumber');
-    const productIds = createOrderInput.products.map(
-      (product) => new Types.ObjectId(product.id),
-    );
+    const products = await this.createItem(createOrderInput.products);
     const order = await this.orderModel.create({
       seller: userId,
-      products: productIds,
+      products: products,
       paymentMethod: createOrderInput.paymentMethod,
       total: createOrderInput.total,
       orderNumber: nextOrderNumber,
     });
 
-    // await order.save();
     return order;
+  }
+  async createItem(products: OrderProducts[]): Promise<Item[]> {
+    const items: Item[] = [];
+    for (const product of products) {
+      const prod = await this.productService.findOne(product.id);
+      const item = {
+        id: prod.id,
+        productName: prod.productName,
+        productImage: prod.productImage,
+        productPrice: prod.productPrice,
+        productUnit: prod.productUnit,
+        quantity: product.cartQuantity,
+      };
+      items.push(item);
+    }
+    return items;
   }
 
   async findAll() {

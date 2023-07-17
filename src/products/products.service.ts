@@ -16,6 +16,7 @@ import { cloudinary } from 'src/cloudinary/cloudinary.config';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { FileUpload } from 'graphql-upload';
+import { Item } from 'src/orders/entities/item.entity';
 
 @Injectable()
 export class ProductsService {
@@ -79,12 +80,15 @@ export class ProductsService {
     }
     return product;
   }
-  async getProductsByIds(productIds: Product[]): Promise<Product[]> {
-    const products = await this.productModel
-      .find({ _id: { $in: productIds } })
-      .exec();
-    return products;
-  }
+  // async getProductsByIds(products: Item[]): Promise<Item[]> {
+  //   const productIds = products.map((product) => product.id);
+
+  //   // Buscar los productos en la base de datos
+  //   const productsItem = await this.productModel
+  //     .find({ _id: { $in: productIds } })
+  //     .exec();
+  //   return productsItem;
+  // }
 
   async update(id: string, updateProductInput: UpdateProductInput) {
     const product = await this.productModel.findById(id);
@@ -111,6 +115,9 @@ export class ProductsService {
         currentInventory + updateProductInput.productInventory;
       product.set({ productInventory: newInventory });
     } else if (typeOperation === 'sell') {
+      if (currentInventory < updateProductInput.productInventory) {
+        throw new Error('No hay suficiente stock disponible');
+      }
       const newInventory =
         currentInventory - updateProductInput.productInventory;
       product.set({ productInventory: newInventory });

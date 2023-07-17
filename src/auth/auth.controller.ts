@@ -98,6 +98,9 @@ export class AuthController {
     const user = await this.authService.register(
       registerInput.email,
       registerInput.password,
+      registerInput.roles,
+      registerInput.firstName,
+      registerInput.lastName,
     );
     const accessToken = await this.authService.generateAccessToken(user);
     const refreshToken = await this.authService.generateRefreshToken(

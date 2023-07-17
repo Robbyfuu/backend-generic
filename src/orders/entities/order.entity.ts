@@ -3,11 +3,12 @@ import * as mongoose from 'mongoose';
 import * as timestamp from 'mongoose-timestamp';
 import { User } from '../../users/entities/user.entity';
 import { Product } from 'src/products/entities/product.entity';
+import { Item } from './item.entity';
 
 @Schema()
 export class Order extends mongoose.Document {
-  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }])
-  products: Product[];
+  @Prop()
+  products: Item[];
 
   @Prop()
   orderNumber: number;
